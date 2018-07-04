@@ -1,9 +1,10 @@
+// incomplete
 package main
 
 import (
 	"log"
-	// "os"
-	// "io/ioutil"
+	"os"
+	"io/ioutil"
 	"context"
 
 	"google.golang.org/grpc"
@@ -32,14 +33,14 @@ func main() {
 
 	req := client.Req{}
 
-	// dgraphClient := dgo.NewDgraphClient(api.NewDgraphClient(conn))
+	dgraphClient := dgo.NewDgraphClient(api.NewDgraphClient(conn))
 
-	// op := &api.Operation{}
+	op := &api.Operation{}
 
-	// ctx := context.Background()
+	ctx := context.Background()
 
-	// txn := dgraphClient.NewTxn()
-	// pb, err := json.Marshal(p)
+	txn := dgraphClient.NewTxn()
+	pb, err := json.Marshal(p)
 
 
 }
