@@ -1,0 +1,13 @@
+
+1.take average ratings for all movies (assign every movie avg rating)
+
+	2.for all movies m_i
+		for all movies m_j s.t. m_i != m_j
+			compute similarityScore (if m_iavg and m_javg are similar)
+			if m_i and m_j are similar:
+				2a. Iterate over all users:
+					If we find a user who has watched only m_i (and not m_j) or only m_j (and not m_i):
+						then we add this movie to his recommendation list
+
+
+For user u_i sort his reccomendations  

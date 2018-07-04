@@ -1,0 +1,22 @@
+# User-user collaborative filtering with variation of only considering scores that similars users have rated as >= 3.
+{
+  var(func: uid(2)) {  # 1
+    a as math(1)
+    seen as rated @facets(r as rating) @facets(ge(rating, 3)) { # 2
+      ~rated @facets(sr as rating) @facets(ge(rating, 3)) {     # 3
+        user_score as math((sr + r)/a) # 4
+      }
+    }
+  }
+
+  var(func: uid(user_score), first:30, orderdesc: val(user_score)) { # 5
+    norm as math(1)
+    rated @filter(not uid(seen)) @facets(ur as rating) {          # 6
+      fscore as math(ur/norm) # 7
+    }
+  }
+
+  Recommendation(func: uid(fscore), orderdesc: val(fscore), first: 10) { # 8
+    name
+  }
+}

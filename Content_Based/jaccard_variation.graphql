@@ -1,0 +1,27 @@
+#Calculate the Jaccard distance and add result with average rating
+{
+  # M1 -- Star Wars by its unique ID
+  var(func: uid(0x30d72)) {
+    g as genre
+  }
+
+  # Calculate the average rating for every movie
+  var(func: has(rated)) {
+    allmovies as rated @facets(a as rating) {
+      c as count(~rated)
+      avg as math(a / c)
+    }
+  }
+
+  # Give every movie a score
+  var(func: uid(allmovies)) {
+    x as count(genre @filter(uid(g)))
+    score as math(avg + x)
+  }
+
+  # Return the top 10 movies
+  fin(func: uid(score), orderdesc: val(score), first: 10) {
+    name
+    val(score)
+  }
+}

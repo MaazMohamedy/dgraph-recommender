@@ -1,0 +1,45 @@
+#Calculate the cosine distance by creating vectors in n-dimensional space. Distance is calculated by finding the difference in angle between vectors
+{
+  # Calculate the average rating of every movie
+  var(func: has(rated)) {
+    rated @facets(r as rating) {
+      c as count(~rated)
+      M2_avg_rating as math(r / c)
+      M2_num_gen as count(genre)
+    }
+  }
+
+  # Calculate a cosine difference score for every movie that shares
+  # at least 1 genre with M1
+  var(func: uid(0x30d80)) {    # movie M1
+    norm as math(1)     # 1
+
+    # Find the average rating for M1
+    M1_num_ratings as count(~rated)
+    ~rated @facets(B as rating)
+    M1_ratings_sum as sum(val(B))
+    M1_avg_rating as math(M1_ratings_sum / M1_num_ratings) # 2
+    M1_num_gen as count(genre)                             # 3
+
+    M1_genres as genre {
+      ~genre { # 4
+        # M2 -- movies reached here share a genre with the initial movie
+
+        # normalize the M1 count and average to account for multiple paths
+        M1_norm_avg as math(M1_avg_rating / norm)
+        num_genN as math(M1_num_gen/norm)              # 5
+        genint as count(genre @filter(uid(M1_genres))) # 6
+
+        score as math((genint + (M1_norm_avg * M2_avg_rating)) /
+          (sqrt(num_genN + (M1_norm_avg*M1_norm_avg)) *
+          sqrt(M2_num_gen + (M2_avg_rating*M2_avg_rating))))    # 7
+
+      }
+    }
+  }
+
+  similarMovies(func: uid(score), first:20, orderdesc: val(score)) { # 8
+    name
+    val(score)
+  }
+}

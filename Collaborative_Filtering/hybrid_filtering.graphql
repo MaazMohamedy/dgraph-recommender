@@ -1,0 +1,31 @@
+# Combining user-user (find similar users and the movies they rate highest) and content based filtering(filter down movies by genre). 
+{
+  var(func: uid(2)) {  # 1
+    rated @groupby(genre) {
+      gc as count(_uid_)
+    }
+
+    a as math(1)
+    seen as rated @facets(r as rating) @facets(ge(rating, 3)) { # 2
+      ~rated @facets(sr as rating) @facets(ge(rating, 3)) {   # 3
+        user_score as math((sr + r)/a) # 4
+      }
+    }
+  }
+
+  var(func: uid(user_score), first:30, orderdesc: val(user_score)) { #5
+    norm as math(1)
+    rated @filter(not uid(seen)) @facets(ur as rating) { # 6
+      genre {
+        q as math(gc)   # 6.1
+      }
+      x as sum(val(q))  # 6.2
+      fscore as math((1+(x/100))*ur/norm) # 7
+    }
+  }
+
+  Recommendation(func: uid(fscore), orderdesc: val(fscore), first: 10) { # 8
+    val(fscore)
+    name
+  }
+}

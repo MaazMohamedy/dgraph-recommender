@@ -1,0 +1,30 @@
+#Calculate the Jaccard distance 
+{
+  # Count the genres for every movie that has been rated
+  var(func: has(~rated)) {
+    M2_num_genres as count(genre)
+  }
+
+
+  # Calculate a Jaccard distance score for every movie that shares
+  # at least 1 genre with the given movie.
+  var(func: uid(0x30d80)) {    # M1
+    norm as math(1)               # 1
+    M1_num_genres as count(genre) # 2
+    M1genres as genre {           # 3
+      ~genre {
+        # M2 -- movies reached here share a genre with the initial movie
+        # normalize the count to account for multiple paths
+        M1_num_genres_norm as math(M1_num_genres / norm)      # 4
+        num_genres as count(genre @filter(uid(M1genres))) # 5
+        distance as math( 1 - ( num_genres / (M1_num_genres_norm + M2_num_genres - num_genres) )) # 6
+      }
+    }
+  }
+
+  # Sort and return closest movies.
+  similarMovies(func: uid(distance), orderasc: val(distance), first: 10) { # 7
+    name
+    val(distance)
+  }
+}
